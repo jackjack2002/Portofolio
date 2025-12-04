@@ -1,0 +1,477 @@
+{
+  "name": "n8n Beta Test",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "@devlikeapro/n8n-nodes-waha.wahaTrigger",
+      "typeVersion": 202502,
+      "position": [
+        0,
+        0
+      ],
+      "id": "10d60ed9-6cd6-4924-b18a-bc4a3dc2f620",
+      "name": "WAHA Trigger",
+      "webhookId": "40a4b2df-918c-4bab-854e-901c4010e2d4"
+    },
+    {
+      "parameters": {
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        272
+      ],
+      "id": "86f85e46-6233-49cb-bbba-e65024badeb7",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9277cd01-cd0f-486f-96c5-7b41da85059d",
+              "leftValue": "={{ $json.payload.from }}",
+              "rightValue": "@c.us",
+              "operator": {
+                "type": "string",
+                "operation": "endsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        272,
+        384
+      ],
+      "id": "d7702994-32fe-4793-b612-b346c38fe34a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Start Typing",
+        "session": "={{ $('WAHA Trigger').item.json.session }}",
+        "chatId": "={{ $('WAHA Trigger').item.json.payload.from }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        1152,
+        272
+      ],
+      "id": "77a6dec1-e631-4125-a37c-8fa051f21dbe",
+      "name": "Start Typing",
+      "credentials": {
+        "wahaApi": {
+          "id": "vfKCEk3eXmJ1xs9C",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('WAHA Trigger').item.json.payload.body }}",
+        "options": {
+          "systemMessage": "=akses ke tool google sheets untuk semua data",
+          "enableStreaming": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1392,
+        272
+      ],
+      "id": "67dbffce-85ae-4ac4-b362-64aef280dbc9",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('WAHA Trigger').item.json.payload.from }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1472,
+        496
+      ],
+      "id": "642b8005-9b9d-4a46-9945-31b962bb0eca",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('Edit Fields').item.json.session }}",
+        "chatId": "={{ $('Edit Fields').item.json.payload.from }}",
+        "text": "={{ $json['Tambahan Text'] }}",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        1152,
+        496
+      ],
+      "id": "01f2ecd8-25a1-4ca8-ad4e-d99c9303d7c0",
+      "name": "Send a text message",
+      "credentials": {
+        "wahaApi": {
+          "id": "vfKCEk3eXmJ1xs9C",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 480,
+        "width": 1056,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        656,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "1c98f083-640e-4b3b-8ec4-8b896556c375",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor(Math.random() * 3) + 2 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        928,
+        496
+      ],
+      "id": "9e81f87a-c989-4b34-8c44-3bda5f08e473",
+      "name": "Wait",
+      "webhookId": "04c91058-72b3-4681-98ad-388ae41ca827"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 480,
+        "width": 384,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        240,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "f9ce77be-431b-4788-bef7-36016738ef57",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d7a8038a-9bc1-4ae3-b43b-595020b82a15",
+              "name": "Tambahan Text",
+              "value": "={{ $json.output + \"\\n\\n> _Jack_\" }}\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        496
+      ],
+      "id": "715cd753-bfe0-4351-bb49-34b2cb7c76e6",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        272
+      ],
+      "id": "5ae2f894-ed72-4b4e-9741-03aa6b8a0e04",
+      "name": "Wait1",
+      "webhookId": "699a7428-d309-4cbc-8fdd-2a7762bbb347"
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Seen",
+        "session": "={{ $('WAHA Trigger').item.json.session }}",
+        "chatId": "={{ $('WAHA Trigger').item.json.payload.from }}",
+        "messageId": "={{ $('WAHA Trigger').item.json.payload.id }}",
+        "participant": "",
+        "requestOptions": {}
+      },
+      "type": "@devlikeapro/n8n-nodes-waha.WAHA",
+      "typeVersion": 202502,
+      "position": [
+        928,
+        272
+      ],
+      "id": "73ca4116-c096-45ab-8238-4f1dc99297eb",
+      "name": "Send Seen",
+      "credentials": {
+        "wahaApi": {
+          "id": "vfKCEk3eXmJ1xs9C",
+          "name": "WAHA account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        496
+      ],
+      "id": "a13ece01-74d6-41d7-87e2-50be3b33be4e",
+      "name": "Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "uTjNj0AWVwOch08h",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1K4Wq-mbkHyMsQP5c02YS9fBSGe9a3vI8vQZtMAlk2-g/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 354128788,
+          "mode": "list",
+          "cachedResultName": "Rundown Panitia",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1K4Wq-mbkHyMsQP5c02YS9fBSGe9a3vI8vQZtMAlk2-g/edit#gid=354128788"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1600,
+        496
+      ],
+      "id": "00fdea8f-47db-4d7a-bc1e-bdaf2fac17eb",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "vLwN0nIW0y5WiOjZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Bot WhatsApp ambil data dari Spreadsheet",
+        "height": 80,
+        "width": 736,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        560,
+        112
+      ],
+      "typeVersion": 1,
+      "id": "269aed23-9515-4ec5-8513-acb9d66de67f",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "WAHA Trigger": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Typing": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Send Seen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Seen": {
+      "main": [
+        [
+          {
+            "node": "Start Typing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8d2e1930-98c7-4f3e-aae5-c0e400a921be",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d51d83fed04816929469888a43ffb53fc6d70e0426efd2d2ee8360ee471a8d79"
+  },
+  "id": "1lPu42LlL72HLV7G",
+  "tags": [
+    {
+      "updatedAt": "2025-11-28T12:59:21.787Z",
+      "createdAt": "2025-11-28T12:59:21.787Z",
+      "id": "Cg5JyqGpydZlQJUA",
+      "name": "WAHA"
+    },
+    {
+      "updatedAt": "2025-12-01T13:57:20.244Z",
+      "createdAt": "2025-12-01T13:57:20.244Z",
+      "id": "WdVPosrbakuJ3OPZ",
+      "name": "Google Sheets"
+    }
+  ]
+}
