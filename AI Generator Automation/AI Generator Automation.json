@@ -1,0 +1,966 @@
+{
+  "name": "AI Generator Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        32
+      ],
+      "id": "cb62f811-a26a-43fe-bab7-230e9d6fffb4",
+      "name": "Telegram Trigger",
+      "webhookId": "da750d03-b310-42ae-bfd8-d20f4e1c7e22",
+      "credentials": {
+        "telegramApi": {
+          "id": "tLBqgLa5IlRbegrs",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text.toLowerCase() }}",
+                    "rightValue": "gambar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "244c9dde-dbbc-4bf6-8797-e8574c64389e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text-to-image"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "31accd1f-a14e-4bdb-9c44-3759808bc3c2",
+                    "leftValue": "={{ $json.message.text.toLowerCase() }}",
+                    "rightValue": "video",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "=text-to-video "
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b412c50f-4248-44fb-8da1-dace317a5fe0",
+                    "leftValue": "={{ $json.message.photo.isNotEmpty() && $json.message.caption.toLowerCase().includes('gambar') }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "edit-image"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "27e76c2b-a388-4a32-85bc-f2092f0fa5fe",
+                    "leftValue": "={{ $json.message.photo.isNotEmpty() && $json.message.caption.toLowerCase().includes('video') }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "image-to-video"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        352,
+        -16
+      ],
+      "id": "9428c7d1-3c08-4244-8dfa-fdea483d9d36",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-image",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-image (Nano Banana)"
+        },
+        "prompt": "={{ $json.message.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        560,
+        -432
+      ],
+      "id": "b7fc0b10-f048-4241-a6b9-4c87c2961902",
+      "name": "Generate an image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "uTjNj0AWVwOch08h",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1152,
+        -432
+      ],
+      "id": "a1631f3a-f1c5-4679-bce4-d3e79dc9cbd8",
+      "name": "Send a photo message",
+      "webhookId": "53e2c7c1-af08-4997-ae96-f6796650bd0b",
+      "credentials": {
+        "telegramApi": {
+          "id": "tLBqgLa5IlRbegrs",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "modelId": {
+          "__rl": true,
+          "value": "models/veo-3.1-fast-generate-preview",
+          "mode": "list",
+          "cachedResultName": "models/veo-3.1-fast-generate-preview"
+        },
+        "prompt": "={{ $('Telegram Trigger').item.json.message.text }}",
+        "options": {
+          "aspectRatio": "9:16"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        560,
+        -208
+      ],
+      "id": "d3d3e7b9-a94b-450e-b2b7-eda4042e9422",
+      "name": "Generate a video",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "uTjNj0AWVwOch08h",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 1136,
+        "width": 1414,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        192,
+        -480
+      ],
+      "typeVersion": 1,
+      "id": "220ec120-9662-4c58-994e-4d3297f4acb5",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "sendVideo",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1152,
+        -208
+      ],
+      "id": "f01efbe7-b295-41ac-ad93-7558b7ddd908",
+      "name": "Send a video",
+      "webhookId": "3a2cbf50-f978-41aa-a233-276774f6a09e",
+      "credentials": {
+        "telegramApi": {
+          "id": "tLBqgLa5IlRbegrs",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "edit",
+        "prompt": "={{ $('Telegram Trigger').item.json.message.caption }}",
+        "images": {
+          "values": [
+            {}
+          ]
+        },
+        "options": {
+          "binaryPropertyOutput": "data"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        736,
+        32
+      ],
+      "id": "1d6e92ea-7c89-4552-8b5d-cc4f5f1e29b6",
+      "name": "Edit an image",
+      "retryOnFail": true,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "uTjNj0AWVwOch08h",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.photo[1].file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        32
+      ],
+      "id": "1d1fdd8a-f6e8-481f-9a7a-c5afc69d0614",
+      "name": "Get a file",
+      "webhookId": "32a0b49a-730a-4cd7-960a-7c33dfa0e038",
+      "credentials": {
+        "telegramApi": {
+          "id": "tLBqgLa5IlRbegrs",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Telegram Trigger').item.json.message.photo[1].file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1104,
+        16
+      ],
+      "id": "2c8a23de-2db8-407a-9ffa-8f5e068447aa",
+      "name": "Get a pic for video",
+      "webhookId": "9bbdb413-b5b0-4ee8-9a75-e7a18d4fd8dd",
+      "credentials": {
+        "telegramApi": {
+          "id": "tLBqgLa5IlRbegrs",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c3ade2a4-8005-4135-aa29-532db739db5f",
+              "name": "YOUR-PROJECT-ID",
+              "value": "n8n-stb-479603",
+              "type": "string"
+            },
+            {
+              "id": "ad36d2ff-06a7-469b-9bb9-619d090a2f41",
+              "name": "BASE64-EDITED-IMAGE",
+              "value": "={{ $json.data }}",
+              "type": "string"
+            },
+            {
+              "id": "448020ae-8eb2-4957-9ba7-13a088e19e8e",
+              "name": "video_prompt",
+              "value": "={{ $('Telegram Trigger').item.json.message.caption }}",
+              "type": "string"
+            },
+            {
+              "id": "3e7241c7-de01-47dc-a934-3ecedeb1d59d",
+              "name": "aspect_ratio",
+              "value": "=9:16",
+              "type": "string"
+            },
+            {
+              "id": "d79179c7-8f73-4667-8e83-a25318716871",
+              "name": "resolution",
+              "value": "=1080p",
+              "type": "string"
+            },
+            {
+              "id": "78790fbf-e397-4818-881c-cfcdb760c701",
+              "name": "model",
+              "value": "veo-3.1-fast-generate-preview",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1440,
+        16
+      ],
+      "id": "5891aca8-94cc-412d-aced-cebfe6e13194",
+      "name": "Utils"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "79c22793-6816-4c18-a19f-26f2adc566ec",
+              "leftValue": "={{ $json.response.videos[0].bytesBase64Encoded }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1264,
+        224
+      ],
+      "id": "910e4056-02d3-4ef0-a105-293dc675cb7a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "response.videos[0].bytesBase64Encoded",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1440,
+        224
+      ],
+      "id": "4a3bf98d-13a6-4ee5-8bbd-095a9672ed7e",
+      "name": "Convert to File Result"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://us-central1-aiplatform.googleapis.com/v1/projects/{{ $('Utils').item.json['YOUR-PROJECT-ID'] }}/locations/us-central1/publishers/google/models/{{ $('Utils').item.json.model }}:predictLongRunning",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"instances\": [\n    {\n      \"image\": {\n        \"bytesBase64Encoded\": $json[\"BASE64-EDITED-IMAGE\"],\n        \"mimeType\": \"image/png\"\n      },\n      \"prompt\": $json.video_prompt\n    }\n  ],\n  \"parameters\": {\n    \"aspectRatio\": $json.aspect_ratio,\n    \"durationSeconds\": 8,\n    \"personGeneration\": \"allow_adult\",\n    \"generateAudio\": true,\n    \"resolution\": $json.resolution\n  }\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        736,
+        224
+      ],
+      "id": "4ec0c650-341a-40d0-9159-04d732dfd767",
+      "name": "Veo 3.1",
+      "retryOnFail": true,
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "nJDddFmnsfwj5Blu",
+          "name": "Google account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://us-central1-aiplatform.googleapis.com/v1/projects/{{ $('Utils').item.json['YOUR-PROJECT-ID'] }}/locations/us-central1/publishers/google/models/{{ $('Utils').item.json.model }}:fetchPredictOperation",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"operationName\": \"{{ $('Veo 3.1').item.json.name }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1088,
+        224
+      ],
+      "id": "5d4c5a03-430c-4aa0-b77c-0b33e1749c8e",
+      "name": "Get Video",
+      "retryOnFail": true,
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "nJDddFmnsfwj5Blu",
+          "name": "Google account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        16
+      ],
+      "id": "1063cff2-88b8-4f96-b184-ce6e2d038eb6",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "amount": 40
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        912,
+        224
+      ],
+      "id": "86be59f9-0809-4aa1-9406-edabd000c28c",
+      "name": "Wait 40 Sec",
+      "webhookId": "c26e0d0d-3039-4da5-9c76-b9249d40d673"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "=Mohon maaf untuk promptnya salah ya...\n\nGunakan kata \"gambar\" untuk generate image/edit image\nGunakan kata \"video\" untuk generate video",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        496
+      ],
+      "id": "00ed541b-e246-4c29-9b22-8b99e888d37b",
+      "name": "Wrong Prompt",
+      "webhookId": "0bc7051e-7e41-4b85-b0f4-9ffcba5a90d7",
+      "credentials": {
+        "telegramApi": {
+          "id": "tLBqgLa5IlRbegrs",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 464,
+        "width": 896
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        688,
+        -16
+      ],
+      "typeVersion": 1,
+      "id": "ccae268a-1371-430e-acd7-4338738e5d91",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 208,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        688,
+        -16
+      ],
+      "typeVersion": 1,
+      "id": "e37a7450-77fc-4fca-b8ce-3efcb5746fce",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 208,
+        "width": 896,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        688,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "7c58b27f-f15d-43c5-bfdc-0d985c3d8a02",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 208,
+        "width": 896,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        688,
+        -464
+      ],
+      "typeVersion": 1,
+      "id": "cb7e5a7e-1be9-4a6e-9675-f29feb17ebb1",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Telegram Trigger').item.json.message.photo[1].file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        256
+      ],
+      "id": "1df094c7-ebe5-476e-91c0-5629b40d1b4d",
+      "name": "Get a file1",
+      "webhookId": "f94741e6-8817-4d16-96ed-6acd40bbd7a4",
+      "credentials": {
+        "telegramApi": {
+          "id": "tLBqgLa5IlRbegrs",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 176,
+        "width": 896,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        688,
+        464
+      ],
+      "typeVersion": 1,
+      "id": "ae729526-fc8e-4778-928b-04c9691fdbce",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        960,
+        496
+      ],
+      "id": "b9e2c10d-db74-4362-925f-5c92974f229e",
+      "name": "Send a photo message1",
+      "webhookId": "301ca1c2-119f-4195-8bf8-60e31f643731",
+      "credentials": {
+        "telegramApi": {
+          "id": "tLBqgLa5IlRbegrs",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "AgACAgUAAxkDAANmaSxkyOeQwJ9URU99xV-Udcnp9l4AAt8Maxudz2BVOT5cYfxzQAoBAAMCAANtAAM2BA",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        768,
+        496
+      ],
+      "id": "dc8ab2d5-8fd6-41cc-a30e-b94410b52c9c",
+      "name": "Get a file2",
+      "webhookId": "02f7d7b4-00fe-4156-a8be-a6ea20bdc847",
+      "credentials": {
+        "telegramApi": {
+          "id": "tLBqgLa5IlRbegrs",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Ai Generator\n## Text To Image\n## Text To Video\n## Edit Image\n## Image To Video\n",
+        "height": 272,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        224,
+        -448
+      ],
+      "typeVersion": 1,
+      "id": "4b149c70-9fc6-4196-aa0b-84edff94379b",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Generate an image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generate a video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a file1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wrong Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate an image": {
+      "main": [
+        [
+          {
+            "node": "Send a photo message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate a video": {
+      "main": [
+        [
+          {
+            "node": "Send a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit an image": {
+      "main": [
+        [
+          {
+            "node": "Send a photo message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Edit an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Utils": {
+      "main": [
+        [
+          {
+            "node": "Veo 3.1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Convert to File Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 40 Sec",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Veo 3.1": {
+      "main": [
+        [
+          {
+            "node": "Wait 40 Sec",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Utils",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a pic for video": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File Result": {
+      "main": [
+        [
+          {
+            "node": "Send a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 40 Sec": {
+      "main": [
+        [
+          {
+            "node": "Get Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file1": {
+      "main": [
+        [
+          {
+            "node": "Get a pic for video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a photo message": {
+      "main": [
+        []
+      ]
+    },
+    "Wrong Prompt": {
+      "main": [
+        [
+          {
+            "node": "Get a file2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file2": {
+      "main": [
+        [
+          {
+            "node": "Send a photo message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cd909217-0e08-4d19-8ef7-1614f784701c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d51d83fed04816929469888a43ffb53fc6d70e0426efd2d2ee8360ee471a8d79"
+  },
+  "id": "B4D7nIzdPyjZMsYy",
+  "tags": [
+    {
+      "updatedAt": "2025-11-27T06:55:56.193Z",
+      "createdAt": "2025-11-27T06:55:56.193Z",
+      "id": "esWTDdNwlRPvlteD",
+      "name": "Veo3"
+    },
+    {
+      "updatedAt": "2025-11-28T14:20:04.438Z",
+      "createdAt": "2025-11-28T14:20:04.438Z",
+      "id": "Mdr30gLfrLQUPP95",
+      "name": "Telegram"
+    },
+    {
+      "updatedAt": "2025-11-28T14:20:37.643Z",
+      "createdAt": "2025-11-28T14:20:37.643Z",
+      "id": "NlWlP61HJQS9Ysce",
+      "name": "Gemini"
+    }
+  ]
+}
