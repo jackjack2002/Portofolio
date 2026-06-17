@@ -1,51 +1,497 @@
-# PROJECT BRIEF: SISTEM MANAJEMEN ARISAN OTOMATIS (PREMIUM UNIVERSAL)
+<!doctype html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <title>Member Portal | Arisan System</title>
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+        <script src="https://unpkg.com/lucide@latest"></script>
+        <style>
+            :root {
+                --bg-deep: #0a0a0a;
+                --card-bg: #141414;
+                --card-border: rgba(255, 87, 34, 0.4);
+                --accent-main: #ff5722;
+                --accent-gold: #ff9800;
+                --text-primary: #ffffff;
+                --text-secondary: #a3a3a3;
+                --success: #4ade80;
+                --glow: 0 0 15px rgba(255, 87, 34, 0.2);
+            }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: "Plus Jakarta Sans", sans-serif;
+            }
+            html, body {
+                overflow-x: hidden;
+                width: 100%;
+            }
+            body {
+                background: linear-gradient(-45deg, #1b2735, #29323c, #2b3a42, #1b2735);
+                background-size: 400% 400%;
+                animation: gradientBG 15s ease infinite;
+                color: var(--text-primary);
+                min-height: 100vh;
+                padding: 16px;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            @keyframes gradientBG {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+            }
+            .container {
+                width: 100%;
+                max-width: 640px;
+                margin: auto;
+            }
+            header {
+                text-align: center;
+                margin-bottom: 24px;
+                padding: 10px 0;
+            }
+            h1 {
+                font-size: 1.6rem;
+                font-weight: 800;
+                color: #fff;
+                margin-bottom: 4px;
+                letter-spacing: -0.5px;
+            }
+            header p {
+                color: var(--accent-main);
+                font-weight: 700;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+            }
+            .search-container {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                margin-bottom: 32px;
+            }
+            .search-box {
+                background: var(--card-bg);
+                border-radius: 16px;
+                border: 1px solid var(--card-border);
+                padding: 2px;
+                box-shadow: var(--glow);
+            }
+            .search-box input {
+                background: transparent;
+                border: none;
+                padding: 16px;
+                color: white;
+                font-size: 1.1rem;
+                text-align: center;
+                outline: none;
+                width: 100%;
+                font-weight: 700;
+            }
+            .search-button {
+                background: var(--accent-main);
+                color: white;
+                border: none;
+                padding: 16px;
+                border-radius: 16px;
+                font-weight: 800;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                text-transform: uppercase;
+                box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);
+                transition: all 0.3s ease;
+            }
+            .search-button:disabled {
+                background: #444;
+                cursor: not-allowed;
+                box-shadow: none;
+            }
+            .dashboard-grid {
+                display: none;
+                flex-direction: column;
+                gap: 16px;
+                width: 100%;
+            }
+            .bento-card {
+                background: var(--card-bg);
+                border: 1px solid var(--card-border);
+                border-radius: 16px;
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                box-shadow: var(--glow);
+                transition: border-color 0.3s ease;
+            }
+            .card-label {
+                color: var(--text-secondary);
+                font-size: 0.65rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                letter-spacing: 1px;
+            }
+            .member-name {
+                font-size: 1.3rem;
+                font-weight: 800;
+                color: #fff;
+                text-align: center;
+                padding: 8px 0;
+            }
+            .info-row-bottom {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+                width: 100%;
+            }
+            .info-row-bottom .bento-card {
+                padding: 12px 8px;
+                text-align: center;
+                align-items: center;
+            }
+            .metric-value {
+                font-size: 1.5rem;
+                font-weight: 800;
+                color: var(--accent-gold);
+                line-height: 1;
+            }
+            .product-value {
+                font-size: 0.85rem;
+                font-weight: 700;
+                color: white;
+            }
 
-## 1. Ringkasan Sistem
-Sistem ini adalah platform manajemen arisan *end-to-end* yang terotomatisasi secara penuh. Alur data dimulai dari **Google Form** yang terhubung ke **Spreadsheet**. Logika pemrosesan dijalankan melalui **Google Apps Script (`Kode.gs`)**, didukung oleh **Dashboard Operasional** admin dan **Portal Web Premium** untuk pengecekan mandiri oleh member dengan tampilan adaptif (Desktop & Mobile).
+            /* --- DESKTOP TABLE VIEW --- */
+            .desktop-only { display: block; }
+            .mobile-only { display: none; }
 
-## 2. Arsitektur Data & Spreadsheet
-Spreadsheet utama (ID: `16IU7WAWJR5KQWKc_fmJisTBnaZSOC1MgknAYFizMw3I`) terdiri dari:
-*   **Data Pendaftar:** Penampung Google Form dengan flag `PROCESSED` di Kolom P.
-*   **Master_Member:** Database utama dengan pembersihan NIK (safe string `'`) dan format `wa.me`.
-*   **DASHBOARD:** Panel monitoring populasi member, grup aktif, dan target closing.
-*   **25 Sheet Produk:** Kombinasi 5 Produk (KM, KB, MM, MB, LH) dan 5 Paket (49k s/d 999k).
+            .table-container {
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                background: rgba(255, 255, 255, 0.02);
+                border-radius: 12px;
+                border: 1px solid rgba(255, 255, 255, 0.05);
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                min-width: 500px;
+            }
+            th {
+                background: rgba(255, 87, 34, 0.1);
+                padding: 14px 10px;
+                color: var(--accent-main);
+                font-size: 0.75rem;
+                font-weight: 800;
+                border-bottom: 2px solid var(--accent-main);
+                text-align: center;
+            }
+            th:nth-child(1), th:nth-child(2) { text-align: left; }
+            td {
+                padding: 14px 10px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                font-size: 0.85rem;
+                color: #ddd;
+                text-align: center;
+            }
+            td:nth-child(1), td:nth-child(2) { text-align: left; }
+            .row-user { background: rgba(255, 87, 34, 0.15); }
+            .row-user td { color: #fff; font-weight: 700; }
 
-## 3. Standarisasi Struktur Sheet Produk
-*   **Universal 9-Column:** Seluruh produk (termasuk LH) WAJIB menggunakan **9 Kolom Pembayaran** (Kolom N s/d V) dan 1 Kolom Status **DONE** (Kolom W).
-*   **Layout Data:** Data member dimulai dari **Baris 6**. Baris 1-5 adalah area judul dan label grup.
-*   **LH Spacing:** Khusus produk LH, setiap grup memiliki jarak **103 baris** (100 slot member + 3 baris header) untuk menjaga keteraturan visual.
-*   **Produk Lain:** Menggunakan spacing **13 baris** (9 slot member + 4 baris header).
+            /* --- MOBILE CARD VIEW --- */
+            @media (max-width: 767px) {
+                .desktop-only { display: none; }
+                .mobile-only { display: flex; flex-direction: column; gap: 12px; }
+            }
 
-## 4. Mekanisme Otomatisasi (Apps Script - `SIAP_COPY_KODE_GS.txt`)
-1.  **📥 Tarik Pendaftar Baru (`pullNewRegistrations`):** Memindahkan data form ke database master dengan proteksi duplikasi NIK.
-2.  **▶️ Proses Member ke Grup (`processAllPendingMembers`):** 
-    *   **Surgical Write:** Script hanya menulis Nama & NIK (Kolom B-C) untuk mencegah kerusakan format checkbox yang sudah ada di spreadsheet.
-    *   **Logic:** Menggunakan `maxCols = 9` secara universal untuk sinkronisasi portal.
+            .member-card {
+                background: rgba(255, 255, 255, 0.03);
+                border-radius: 14px;
+                padding: 16px;
+                border: 1px solid rgba(255, 255, 255, 0.05);
+                position: relative;
+            }
+            .member-card.is-login {
+                border: 1.5px solid var(--accent-main);
+                background: rgba(255, 87, 34, 0.08);
+                box-shadow: var(--glow);
+            }
+            .card-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+            }
+            .card-no-name {
+                font-weight: 700;
+                font-size: 0.95rem;
+                color: #fff;
+            }
+            .member-card.is-login .card-no-name {
+                color: var(--accent-main);
+            }
+            .payment-grid {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin: 10px 0;
+            }
+            .status-section {
+                margin-top: 12px;
+                padding-top: 10px;
+                border-top: 1px solid rgba(255, 255, 255, 0.05);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .status-label {
+                font-size: 0.65rem;
+                color: var(--text-secondary);
+                text-transform: uppercase;
+                font-weight: 700;
+            }
+            .status-badge {
+                font-size: 0.75rem;
+                font-weight: 800;
+                padding: 4px 10px;
+                border-radius: 20px;
+                background: rgba(255, 255, 255, 0.05);
+            }
+            .status-badge.done {
+                color: var(--success);
+                background: rgba(74, 222, 128, 0.1);
+            }
+            .status-badge.pending {
+                color: var(--accent-gold);
+                background: rgba(255, 152, 0, 0.1);
+            }
+            .check-icon { color: var(--success); filter: drop-shadow(0 0 5px var(--success)); }
+            .award-icon { color: var(--accent-gold); filter: drop-shadow(0 0 5px var(--accent-gold)); }
 
-## 5. Portal Member Premium (Frontend - `SIAP_COPY_PORTAL.html`)
-Portal telah didesain ulang dengan pendekatan **Mobile-First (Android Optimized)**:
-*   **Responsive Display:**
-    *   **Desktop:** Menampilkan tabel riwayat pembayaran penuh dengan scroll horizontal yang halus.
-    *   **Mobile (<767px):** Mengubah tabel menjadi **Card List** yang modern. Setiap member ditampilkan dalam satu kartu dengan grid status pembayaran (Emoji ✅/❌).
-*   **UI/UX Premium:** 
-    *   **Layout Dashboard:** Nama (Full Width), diikuti Grup, Paket, dan Produk dalam 3 kolom seimbang.
-    *   **Premium Loading:** Spinner modern dengan efek blur background dan teks "Mengambil Data Member...".
-    *   **Highlight Member:** Member yang sedang login akan ditandai dengan **Border Orange Glow** dan teks "(ANDA)".
-    *   **Visual:** Menggunakan font *Plus Jakarta Sans* dan *Lucide Icons*.
+            #loading {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 2000;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(10px);
+                color: white;
+            }
+            .spinner {
+                width: 50px;
+                height: 50px;
+                border: 4px solid rgba(255, 87, 34, 0.1);
+                border-left-color: var(--accent-main);
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin-bottom: 20px;
+            }
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+            .loading-text {
+                font-weight: 800;
+                font-size: 1rem;
+                color: var(--accent-main);
+                margin-bottom: 5px;
+            }
+            .loading-subtext {
+                font-size: 0.75rem;
+                color: var(--text-secondary);
+                text-transform: uppercase;
+                letter-spacing: 2px;
+            }
+            .scroll-tip {
+                text-align: center;
+                color: var(--text-secondary);
+                font-size: 0.65rem;
+                margin-top: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>PORTAL MEMBER</h1>
+                <p>Arisan System Otomatis</p>
+            </header>
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="tel" id="nikInput" placeholder="MASUKKAN NIK ANDA" inputmode="numeric" />
+                </div>
+                <button class="search-button" id="searchBtn">
+                    <i data-lucide="search" size="18"></i> LIHAT STATUS SAYA
+                </button>
+            </div>
+            <div id="dashboard" class="dashboard-grid">
+                <div class="bento-card">
+                    <div class="card-label"><i data-lucide="user" size="12"></i> Nama Lengkap</div>
+                    <div id="resNama" class="member-name">--</div>
+                </div>
+                <div class="info-row-bottom">
+                    <div class="bento-card">
+                        <div class="card-label"><i data-lucide="users" size="10"></i> Grup</div>
+                        <div id="resGrup" class="metric-value">--</div>
+                    </div>
+                    <div class="bento-card">
+                        <div class="card-label"><i data-lucide="package" size="10"></i> Paket</div>
+                        <div id="resPaket" class="metric-value">--</div>
+                    </div>
+                    <div class="bento-card">
+                        <div class="card-label"><i data-lucide="layers" size="10"></i> Produk</div>
+                        <div id="resProduk" class="product-value">--</div>
+                    </div>
+                </div>
+                <div class="bento-card">
+                    <div class="card-label"><i data-lucide="calendar" size="12"></i> Riwayat Pembayaran</div>
 
-## 6. Struktur Workspace & File Penting
-Seluruh aset penting dipusatkan di folder `Documents/Arisan Project GeminiCli/`:
-*   `SIAP_COPY_KODE_GS.txt`: Sumber kode backend final.
-*   `SIAP_COPY_PORTAL.html`: Sumber kode frontend portal final.
-*   `rebuild_dashboard_v3.py`: Script Python untuk perbaikan dashboard.
-*   `generate_all_groups_v2.py`: Script Python untuk pembuatan grup massal.
-*   `/Simulations`: Folder berisi script testing dan simulasi pendaftaran.
+                    <!-- DESKTOP TABLE -->
+                    <div class="table-container desktop-only">
+                        <table id="historyTable">
+                            <thead><tr id="tableHeader"></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                        <div class="scroll-tip"><i data-lucide="arrow-left-right" size="10"></i> Geser tabel ke samping</div>
+                    </div>
 
-## 7. PROTOKOL KETAT (MUST READ)
-1.  **DILARANG** mengubah `maxCols` di Apps Script menjadi selain **9** tanpa instruksi eksplisit.
-2.  **Surgical Update:** Jangan menulis ulang seluruh kode sheet jika hanya diperlukan perubahan data identitas. Gunakan `.setValues()` hanya pada kolom yang dituju.
-3.  **Deployment:** Selalu deploy sebagai Web App dengan akses "Anyone" agar Portal dapat diakses oleh member.
-4.  **Data Safety:** Gunakan string kosong `""` untuk menghapus Nama. JANGAN menggunakan `.clear()` karena akan menghapus validasi checkbox.
+                    <!-- MOBILE CARD LIST -->
+                    <div id="mobileCardList" class="mobile-only"></div>
+                </div>
+            </div>
+        </div>
 
----
-*Dokumen ini diperbarui pada 13 Juni 2026. Versi ini adalah standar FINAL untuk Sistem Arisan Premium Universal.*
+        <div id="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">Mengambil Data Member...</div>
+            <div class="loading-subtext">Mohon Tunggu</div>
+        </div>
+
+        <script>
+            lucide.createIcons();
+
+            var nikInput = document.getElementById("nikInput");
+            var searchBtn = document.getElementById("searchBtn");
+
+            nikInput.addEventListener("keypress", function(e) {
+                if (e.key === "Enter") handleSearch();
+            });
+            searchBtn.addEventListener("click", handleSearch);
+
+            function handleSearch() {
+                var nik = nikInput.value.trim();
+                if (!nik) return;
+
+                searchBtn.disabled = true;
+                searchBtn.innerHTML = "MEMUAT...";
+                document.getElementById("loading").style.display = "flex";
+
+                if (typeof google !== "undefined" && google.script && google.script.run) {
+                    google.script.run
+                        .withSuccessHandler(function(res) {
+                            searchBtn.disabled = false;
+                            searchBtn.innerHTML = '<i data-lucide="search" size="18"></i> LIHAT STATUS SAYA';
+                            document.getElementById("loading").style.display = "none";
+                            lucide.createIcons();
+                            if (res.error) { alert(res.error); return; }
+                            renderDashboard(res, nik);
+                        })
+                        .withFailureHandler(function(err) {
+                            searchBtn.disabled = false;
+                            searchBtn.innerHTML = '<i data-lucide="search" size="18"></i> LIHAT STATUS SAYA';
+                            document.getElementById("loading").style.display = "none";
+                            lucide.createIcons();
+                            alert("Gagal terhubung ke server.");
+                        })
+                        .searchMemberStatus(nik);
+                }
+            }
+
+            function renderDashboard(res, nik) {
+                document.getElementById("dashboard").style.display = "flex";
+                document.getElementById("resNama").innerText = res.member.nama;
+                document.getElementById("resGrup").innerText = res.member.grupFull ? res.member.grupFull.replace("GROUP ", "") : "-";
+                document.getElementById("resPaket").innerText = res.member.paket;
+                document.getElementById("resProduk").innerText = res.member.produk;
+
+                // DESKTOP RENDERING
+                var thead = document.getElementById("tableHeader");
+                var headerHtml = '<th>#</th><th>NAMA</th>';
+                for (var i = 1; i <= res.maxCols; i++) {
+                    headerHtml += '<th>' + i + '</th>';
+                }
+                headerHtml += '<th>DONE</th>';
+                thead.innerHTML = headerHtml;
+
+                var tbody = document.querySelector("#historyTable tbody");
+                tbody.innerHTML = "";
+
+                // MOBILE RENDERING
+                var mobileList = document.getElementById("mobileCardList");
+                mobileList.innerHTML = "";
+
+                res.history.forEach(function(row) {
+                    var isUser = row.nik.toString() === nik.toString();
+
+                    // Table Row (Desktop)
+                    var tr = document.createElement("tr");
+                    if (isUser) tr.className = "row-user";
+
+                    var htmlTable = '<td>' + row.no + '</td><td>' + row.nama + (isUser ? " (Anda)" : "") + '</td>';
+
+                    // Card (Mobile)
+                    var card = document.createElement("div");
+                    card.className = "member-card" + (isUser ? " is-login" : "");
+
+                    var htmlCard = '<div class="card-header"><div class="card-no-name">' + row.no + ". " + row.nama + (isUser ? " (ANDA)" : "") + '</div></div><div class="card-label">Pembayaran:</div><div class="payment-grid">';
+
+                    row.payments.forEach(function(p) {
+                        var isL = ["LUNAS", "V", "TRUE", "DONE", "CHECKED"].indexOf(p.toString().toUpperCase()) !== -1;
+
+                        // Add to Table
+                        htmlTable += '<td>' + (isL ? '<i data-lucide="check-circle-2" class="check-icon" size="14"></i>' : "-") + '</td>';
+
+                        // Add to Card
+                        htmlCard += isL ? '<i data-lucide="check-circle-2" class="check-icon" size="16"></i>' : '<span style="color:rgba(255,255,255,0.1)">\u2715</span>';
+                    });
+
+                    var isD = ["DONE", "TRUE", "V", "CHECKED"].indexOf(row.done.toString().toUpperCase()) !== -1;
+
+                    // Finalize Table
+                    htmlTable += '<td>' + (isD ? '<i data-lucide="award" class="award-icon" size="16"></i>' : "-") + '</td>';
+                    tr.innerHTML = htmlTable;
+                    tbody.appendChild(tr);
+
+                    // Finalize Card
+                    htmlCard += '</div><div class="status-section"><div class="status-label">Status:</div><div class="status-badge ' + (isD ? "done" : "pending") + '">' + (isD ? "SELESAI" : "BELUM SELESAI") + '</div></div>';
+                    card.innerHTML = htmlCard;
+                    mobileList.appendChild(card);
+                });
+
+                lucide.createIcons();
+                setTimeout(function() {
+                    var userRow = document.querySelector(".row-user");
+                    var userCard = document.querySelector(".is-login");
+                    if (userRow && window.innerWidth >= 768) userRow.scrollIntoView({ behavior: "smooth", block: "center" });
+                    if (userCard && window.innerWidth < 768) userCard.scrollIntoView({ behavior: "smooth", block: "center" });
+                }, 500);
+            }
+        </script>
+    </body>
+</html>
